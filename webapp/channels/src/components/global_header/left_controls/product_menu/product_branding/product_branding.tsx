@@ -24,7 +24,9 @@ const ProductBranding = (): JSX.Element => {
     const Icon = currentProduct?.switcherIcon ? glyphMap[currentProduct.switcherIcon] : ProductChannelsIcon;
 
     return (
-        <ProductBrandingContainer tabIndex={0}>
+        // This is now part of the product menu button, so no need to
+        // tab to it.
+        <ProductBrandingContainer tabIndex={-1}>
             <Icon size={24}/>
             <Heading
                 element='h1'

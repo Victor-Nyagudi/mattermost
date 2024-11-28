@@ -3,6 +3,7 @@
 
 import classNames from 'classnames';
 import React from 'react';
+import * as NewMenu from 'components/menu';
 
 import './menu_item.scss';
 
@@ -40,20 +41,31 @@ export default function menuItem(Component: React.ComponentType<any>) {
             }
 
             return (
-                <li
-                    className={classNames('MenuItem', {
-                        'MenuItem--with-icon': icon,
-                    })}
-                    role='menuitem'
+                // <li
+                //     className={classNames('MenuItem', {
+                //         'MenuItem--with-icon': icon,
+                //     })}
+                //     role='menuitem'
+                //     id={id}
+                // >
+                //     <Component
+                //         text={textProp}
+                //         ariaLabel={text?.toString()}
+                //         id={id + '-button'}
+                //         {...props}
+                //     />
+                // </li>
+                <NewMenu.Item
                     id={id}
-                >
-                    <Component
-                        text={textProp}
-                        ariaLabel={text?.toString()}
-                        id={id + '-button'}
-                        {...props}
-                    />
-                </li>
+                    labels={
+                        <Component
+                            text={textProp}
+                            ariaLabel={text?.toString()}
+                            id={id + '-button'}
+                            {...props}
+                        />
+                    }
+                />
             );
         }
     }

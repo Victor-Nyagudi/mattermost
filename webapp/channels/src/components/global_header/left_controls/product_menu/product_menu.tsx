@@ -2,11 +2,16 @@
 // See LICENSE.txt for license information.
 
 import React, {useRef} from 'react';
-import {useIntl} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {useDispatch, useSelector} from 'react-redux';
 import styled from 'styled-components';
 
+// Compass components, where this comes from,  is a deprecated library.
 import IconButton from '@mattermost/compass-components/components/icon-button'; // eslint-disable-line no-restricted-imports
+import {
+    ProductsIcon,
+} from '@mattermost/compass-icons/components';
+import classNames from 'classnames';
 
 import {getLicense} from 'mattermost-redux/selectors/entities/general';
 
@@ -20,6 +25,7 @@ import {
     useHandleOnBoardingTaskData,
 } from 'components/onboarding_tasks';
 import Menu from 'components/widgets/menu/menu';
+import * as NewMenu from 'components/menu';
 import MenuWrapper from 'components/widgets/menu/menu_wrapper';
 
 import {useCurrentProductId, useProducts, isChannels} from 'utils/products';
@@ -31,10 +37,22 @@ import ProductMenuList from './product_menu_list';
 
 import {useClickOutsideRef} from '../../hooks';
 
+// import './product_menu.scss';
+import MenuCloudTrial from 'components/widgets/menu/menu_items/menu_cloud_trial';
+
 export const ProductMenuContainer = styled.nav`
     display: flex;
     align-items: center;
     cursor: pointer;
+
+    > * + * {
+        margin-left: 12px;
+    }
+`;
+
+const ProdMenuButton = styled.span`
+    display: flex;
+    align-items: center;
 
     > * + * {
         margin-left: 12px;
@@ -49,7 +67,7 @@ export const ProductMenuButton = styled(IconButton).attrs(() => ({
     // we currently need this, since not passing a onClick handler is disabling the IconButton
     // this is a known issue and is being tracked by UI platform team
     // TODO@UI: remove the onClick, when it is not a mandatory prop anymore
-    onClick: () => {},
+    // onClick: () => {},
     inverted: true,
     compact: true,
 }))`
@@ -90,7 +108,7 @@ const ProductMenu = (): JSX.Element => {
         let tourTip;
 
         return (
-            <ProductMenuItem
+            <NewMenu.Item labels={<ProductMenuItem
                 key={product.id}
                 destination={product.switcherLinkURL}
                 icon={product.switcherIcon}
@@ -99,16 +117,17 @@ const ProductMenu = (): JSX.Element => {
                 onClick={handleClick}
                 tourTip={tourTip}
                 id={`product-menu-item-${product.pluginId || product.id}`}
-            />
+            />} />
+
         );
     });
 
     return (
         <div ref={menuRef}>
-            <MenuWrapper
+            {/* <MenuWrapper
                 open={switcherOpen}
-            >
-                <ProductMenuContainer onClick={handleClick}>
+            > */}
+                {/* <ProductMenuContainer onClick={handleClick}>
                     <ProductMenuButton
                         active={switcherOpen}
                         aria-expanded={switcherOpen}
@@ -117,8 +136,51 @@ const ProductMenu = (): JSX.Element => {
                     />
                     {license.IsLicensed === 'false' && <ProductBrandingTeamEdition/>}
                     {license.IsLicensed === 'true' && <ProductBranding/>}
-                </ProductMenuContainer>
-                <Menu
+                </ProductMenuContainer> */}
+                {/* The children (at least the first) HAVE to be a MenuItem, otherwise the accessibility with UP and DOWN arrows doesn't work. */}
+                <NewMenu.Container
+                    menuButton={{
+                        id: 'product_switch_menu',
+                        'aria-label': formatMessage({id: 'global_header.productSwitchMenu', defaultMessage: 'Product switch menu'}),
+                        class: 'style--none',
+                        children:
+                            <ProdMenuButton>
+                                <ProductsIcon size={20} />
+                                {license.IsLicensed === 'false' && <ProductBrandingTeamEdition/>}
+                    {license.IsLicensed === 'true' && <ProductBranding/>}
+                            </ProdMenuButton>,
+                    }}
+                    menu={{
+                        id: 'product-switcher-menu-dropdown',
+                        "aria-label": 'switcherOpen',
+                        className: 'Mui-modified-menu',
+                        onKeyDown: handleClick,
+                    }}
+                >
+                    {/* <ProductMenuItem
+                        destination={'/'}
+                        icon={'product-channels'}
+                        text={'Channels'}
+                        active={isChannels(currentProductID)}
+                        onClick={handleClick}
+                    /> */}
+                    <NewMenu.Item labels={<ProductMenuItem
+                        destination={'/'}
+                        icon={'product-channels'}
+                        text={'Channels'}
+                        active={isChannels(currentProductID)}
+                        onClick={handleClick}
+                    />}/>
+                    {productItems}
+                    <ProductMenuList
+                        isMessaging={isChannels(currentProductID)}
+                        onClick={handleClick}
+                        handleVisitConsoleClick={handleVisitConsoleClick}
+                    />
+                    {/* <NewMenu.Item labels={<FormattedMessage id="primary.label" defaultMessage="2nd Label"/>}/>
+                    <NewMenu.Item labels={<FormattedMessage id="primary.label" defaultMessage="3rd Label"/>}/> */}
+                </NewMenu.Container>
+                {/* <Menu
                     listId={'product-switcher-menu-dropdown'}
                     className={'product-switcher-menu'}
                     id={'product-switcher-menu'}
@@ -132,6 +194,8 @@ const ProductMenu = (): JSX.Element => {
                         onClick={handleClick}
                     />
                     {productItems}
+
+                    // * This should return a fragment whose children are <li></li>
                     <ProductMenuList
                         isMessaging={isChannels(currentProductID)}
                         onClick={handleClick}
@@ -142,8 +206,8 @@ const ProductMenu = (): JSX.Element => {
                             id='startTrial'
                         />
                     </Menu.Group>
-                </Menu>
-            </MenuWrapper>
+                </Menu> */}
+            {/* </MenuWrapper> */}
         </div>
     );
 };

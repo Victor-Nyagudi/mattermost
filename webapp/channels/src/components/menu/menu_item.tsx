@@ -132,6 +132,7 @@ export function MenuItem(props: Props) {
             if (isRoleCheckboxOrRadio(role)) {
                 event.stopPropagation();
             } else {
+                console.log(event.currentTarget);
                 // close submenu first if it is open
                 if (subMenuContext.close) {
                     subMenuContext.close();
@@ -176,7 +177,7 @@ export function MenuItem(props: Props) {
             {...otherProps}
         >
             {leadingElement && <div className='leading-element'>{leadingElement}</div>}
-            <div className='label-elements'>{labels}</div>
+            <div className='label-elements MenuItem'>{labels}</div>
             {trailingElements && <div className='trailing-elements'>{trailingElements}</div>}
             {children}
         </MenuItemStyled>
@@ -201,6 +202,7 @@ export const MenuItemStyled = styled(MuiMenuItem, {
             '&.MuiMenuItem-root': {
                 fontFamily: '"Open Sans", sans-serif',
                 color: isRegular ? 'var(--center-channel-color)' : 'var(--error-text)',
+                // Adjusted this padding earlier for product switcher menu
                 padding: '6px 20px',
                 display: 'flex',
                 flexDirection: 'row',

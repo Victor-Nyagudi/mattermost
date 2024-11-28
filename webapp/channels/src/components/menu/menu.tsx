@@ -29,6 +29,7 @@ import {isKeyPressed} from 'utils/keyboard';
 
 import {MenuContext, useMenuContextValue} from './menu_context';
 import {MuiMenuStyled} from './menu_styled';
+import classNames from 'classnames';
 
 const MENU_OPEN_ANIMATION_DURATION = 150;
 const MENU_CLOSE_ANIMATION_DURATION = 100;
@@ -60,6 +61,7 @@ type MenuProps = {
     onToggle?: (isOpen: boolean) => void;
     onKeyDown?: (event: KeyboardEvent<HTMLDivElement>, forceCloseMenu?: () => void) => void;
     width?: string;
+    className?: string;
 }
 
 const defaultAnchorOrigin = {vertical: 'bottom', horizontal: 'left'};
@@ -243,7 +245,7 @@ export function Menu(props: Props) {
                     onClick={handleMenuClick}
                     onTransitionExited={providerValue.handleClosed}
                     onKeyDown={handleMenuKeyDown}
-                    className={A11yClassNames.POPUP}
+                    className={classNames(A11yClassNames.POPUP, props.menu.className)}
                     width={props.menu.width}
                     anchorOrigin={props.anchorOrigin || defaultAnchorOrigin}
                     transformOrigin={props.transformOrigin || defaultTransformOrigin}

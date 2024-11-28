@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import glyphMap, {CheckIcon} from '@mattermost/compass-icons/components';
 import type {IconGlyphTypes} from '@mattermost/compass-icons/IconGlyphs';
 
+
 export interface ProductMenuItemProps {
     destination: string;
     icon: IconGlyphTypes;
@@ -19,6 +20,12 @@ export interface ProductMenuItemProps {
     id?: string;
 }
 
+// Width is reduced by 40px to account for the 20px padding on each side
+// the <li> from 'MenuItem' adds. The total width remains 270px (current width) this way
+
+// Read this part of the docs to find out how you can reorganize the
+// CSS to avoid using '!important'.
+// https://mui.com/material-ui/integrations/interoperability/#css-injection-order-2
 const MenuItem = styled(Link)`
     && {
         text-decoration: none;
@@ -26,16 +33,12 @@ const MenuItem = styled(Link)`
     }
 
     height: 40px;
-    width: 270px;
-    padding-left: 16px;
-    padding-right: 20px;
-    display: flex;
+    width: 270px !important;
+    display: flex !important;
     align-items: center;
-    cursor: pointer;
     position: relative;
 
     &:hover {
-        background: rgba(var(--center-channel-color-rgb), 0.08);
         text-decoration: none;
         color: inherit;
     }
@@ -61,6 +64,7 @@ const ProductMenuItem = ({icon, destination, text, active, onClick, tourTip, id}
             to={destination}
             onClick={onClick}
             id={id}
+            tabIndex={-1}
         >
             <ProductIcon
                 size={24}

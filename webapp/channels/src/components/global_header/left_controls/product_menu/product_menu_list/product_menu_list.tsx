@@ -3,6 +3,7 @@
 
 import React, {useEffect} from 'react';
 import {useIntl} from 'react-intl';
+import * as NewMenu from 'components/menu';
 
 import {
     AccountMultipleOutlineIcon,
@@ -33,6 +34,11 @@ import * as UserAgent from 'utils/user_agent';
 import type {ModalData} from 'types/actions';
 
 import './product_menu_list.scss';
+import MenuCloudTrial from 'components/widgets/menu/menu_items/menu_cloud_trial';
+import MenuItemCloudLimit from 'components/widgets/menu/menu_items/menu_item_cloud_limit';
+import MenuItemLink from 'components/widgets/menu/menu_items/menu_item_link';
+import MenuItemToggleModalRedux from 'components/widgets/menu/menu_items/menu_item_toggle_modal_redux';
+import MenuItemExternalLink from 'components/widgets/menu/menu_items/menu_item_external_link';
 
 export type Props = {
     isMobile: boolean;
@@ -108,12 +114,13 @@ const ProductMenuList = (props: Props): JSX.Element | null => {
     const showIntegrations = !isMobile && someIntegrationEnabled && canManageIntegrations;
 
     return (
-        <Menu.Group>
-            <div onClick={onClick}>
-                <Menu.CloudTrial id='menuCloudTrial'/>
-                <Menu.ItemCloudLimit id='menuItemCloudLimit'/>
+        <>
+            {/* <div onClick={onClick}> */}
+                <NewMenu.Separator />
+                <MenuCloudTrial id='menuCloudTrial'/>
+                <MenuItemCloudLimit id='menuItemCloudLimit'/>
                 <SystemPermissionGate permissions={Permissions.SYSCONSOLE_READ_PERMISSIONS}>
-                    <Menu.ItemLink
+                    <MenuItemLink
                         id='systemConsole'
                         show={!isMobile}
                         to='/admin_console'
@@ -133,17 +140,17 @@ const ProductMenuList = (props: Props): JSX.Element | null => {
                         icon={<ApplicationCogIcon size={18}/>}
                     />
                 </SystemPermissionGate>
-                <Menu.ItemLink
+                <MenuItemLink
                     id='integrations'
                     show={isMessaging && showIntegrations}
                     to={'/' + teamName + '/integrations'}
                     text={formatMessage({id: 'navbar_dropdown.integrations', defaultMessage: 'Integrations'})}
                     icon={<WebhookIncomingIcon size={18}/>}
                 />
-                <Menu.ItemToggleModalRedux
+                <MenuItemToggleModalRedux
                     id='userGroups'
                     modalId={ModalIdentifiers.USER_GROUPS}
-                    show={enableCustomUserGroups || isStarterFree || isFreeTrial}
+                    show={true}
                     dialogType={UserGroupsModal}
                     dialogProps={{
                         backButtonAction: openGroupsModal,
@@ -195,7 +202,7 @@ const ProductMenuList = (props: Props): JSX.Element | null => {
                     teamId={teamId}
                     permissions={[Permissions.SYSCONSOLE_WRITE_PLUGINS]}
                 >
-                    <Menu.ItemToggleModalRedux
+                    <MenuItemToggleModalRedux
                         id='marketplaceModal'
                         modalId={ModalIdentifiers.PLUGIN_MARKETPLACE}
                         show={isMessaging && !isMobile && enablePluginMarketplace}
@@ -205,22 +212,22 @@ const ProductMenuList = (props: Props): JSX.Element | null => {
                         icon={<ViewGridPlusOutlineIcon size={18}/>}
                     />
                 </TeamPermissionGate>
-                <Menu.ItemExternalLink
+                <MenuItemExternalLink
                     id='nativeAppLink'
-                    show={appDownloadLink && !UserAgent.isMobileApp()}
+                    show={appDownloadLink !== undefined && !UserAgent.isMobileApp()}
                     url={makeUrlSafe(appDownloadLink)}
                     text={formatMessage({id: 'navbar_dropdown.nativeApps', defaultMessage: 'Download Apps'})}
                     icon={<DownloadOutlineIcon size={18}/>}
                 />
-                <Menu.ItemToggleModalRedux
+                <MenuItemToggleModalRedux
                     id='about'
                     modalId={ModalIdentifiers.ABOUT}
                     dialogType={AboutBuildModal}
                     text={formatMessage({id: 'navbar_dropdown.about', defaultMessage: 'About {appTitle}'}, {appTitle: siteName})}
                     icon={<InformationOutlineIcon size={18}/>}
                 />
-            </div>
-        </Menu.Group>
+            {/* </div> */}
+        </>
     );
 };
 
