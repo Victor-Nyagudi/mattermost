@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React from 'react';
+import React, {useState} from 'react';
 
 import type {Channel} from '@mattermost/types/channels';
 import type {UserProfile} from '@mattermost/types/users';
@@ -18,7 +18,7 @@ export type Option = {
 };
 export type Selected = Option | UserProfile | Channel
 
-type Props = {
+export type Props = {
     id: string;
     providers: Provider[];
     value: string;
@@ -35,152 +35,136 @@ type Props = {
     listPosition: string;
 };
 
-type State = {
-    input: string;
-    focused?: boolean;
-};
-
 type ChangeEvent = {
     target: HTMLInputElement;
 }
 
-export default class AutocompleteSelector extends React.PureComponent<Props, State> {
-    static defaultProps = {
-        id: '',
-        value: '',
-        labelClassName: '',
-        inputClassName: '',
-        listComponent: SuggestionList,
-        listPosition: 'top',
-    };
+const AutocompleteSelector = ({
+    id = '',
+    value = '',
+    labelClassName = '',
+    inputClassName = '',
+    listComponent = SuggestionList,
+    listPosition = 'top',
+    ...props
+}: Props) => {
+    const [input, setInput] = useState('');
+    const [isFocused, setIsFocused] = useState<boolean>();
 
-    suggestionRef?: HTMLElement;
+    let suggestionRef: HTMLElement | undefined;
 
-    constructor(props: Props) {
-        super(props);
-
-        this.state = {
-            input: '',
-        };
-    }
-
-    onChange = (e: ChangeEvent) => {
+    const onChange = (e: ChangeEvent) => {
         if (!e || !e.target) {
             return;
         }
 
-        this.setState({input: e.target.value});
+        setInput(e.target.value);
     };
 
-    handleSelected = (selected: Selected) => {
-        this.setState({input: ''});
+    const handleSelected = (selected: Selected) => {
+        setInput('');
 
-        if (this.props.onSelected) {
-            this.props.onSelected(selected);
+        if (props.onSelected) {
+            props.onSelected(selected);
         }
 
         requestAnimationFrame(() => {
-            if (this.suggestionRef) {
-                this.suggestionRef.blur();
+            if (suggestionRef) {
+                suggestionRef.blur();
             }
         });
     };
 
-    setSuggestionRef = (ref: HTMLElement) => {
-        this.suggestionRef = ref;
+    const setSuggestionRef = (ref: HTMLElement) => {
+        suggestionRef = ref;
     };
 
-    onFocus = () => {
-        this.setState({focused: true});
+    const onFocus = () => {
+        setIsFocused(true);
 
-        if (this.props.toggleFocus) {
-            this.props.toggleFocus(true);
-        }
-    };
-
-    onBlur = () => {
-        this.setState({focused: false});
-
-        if (this.props.toggleFocus) {
-            this.props.toggleFocus(false);
+        if (props.toggleFocus) {
+            props.toggleFocus(true);
         }
     };
 
-    render() {
-        const {
-            providers,
-            placeholder,
-            footer,
-            label,
-            labelClassName,
-            helpText,
-            inputClassName,
-            value,
-            disabled,
-            listComponent,
-            listPosition,
-        } = this.props;
+    const onBlur = () => {
+        setIsFocused(false);
 
-        const {focused} = this.state;
-        let {input} = this.state;
-
-        if (!focused) {
-            input = value;
+        if (props.toggleFocus) {
+            props.toggleFocus(false);
         }
+    };
 
-        let labelContent;
-        if (label) {
-            labelContent = (
-                <label
-                    className={'control-label ' + labelClassName}
-                >
-                    {label}
-                </label>
-            );
-        }
+    const {
+        providers,
+        placeholder,
+        footer,
+        label,
+        helpText,
+        disabled,
+    } = props;
 
-        let helpTextContent;
-        if (helpText) {
-            helpTextContent = (
-                <div className='help-text'>
-                    {helpText}
-                </div>
-            );
-        }
+    const isSelectorFocused = isFocused;
+    let currentInput = input;
 
-        return (
-            <div
-                data-testid='autoCompleteSelector'
-                className='form-group'
+    if (!isSelectorFocused) {
+        currentInput = value;
+    }
+
+    let labelContent;
+    if (label) {
+        labelContent = (
+            <label
+                className={'control-label ' + labelClassName}
             >
-                {labelContent}
-                <div className={inputClassName}>
-                    <SuggestionBox
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        ref={this.setSuggestionRef}
-                        placeholder={placeholder}
-                        listComponent={listComponent}
-                        className='form-control'
-                        containerClass='select-suggestion-container'
-                        value={input}
-                        onChange={this.onChange}
-                        onItemSelected={this.handleSelected}
-                        onFocus={this.onFocus}
-                        onBlur={this.onBlur}
-                        providers={providers}
-                        completeOnTab={true}
-                        renderNoResults={true}
-                        openOnFocus={true}
-                        openWhenEmpty={true}
-                        replaceAllInputOnSelect={true}
-                        disabled={disabled}
-                        listPosition={listPosition}
-                    />
-                    {helpTextContent}
-                    {footer}
-                </div>
+                {label}
+            </label>
+        );
+    }
+
+    let helpTextContent;
+    if (helpText) {
+        helpTextContent = (
+            <div className='help-text'>
+                {helpText}
             </div>
         );
     }
-}
+
+    return (
+        <div
+            data-testid='autoCompleteSelector'
+            className='form-group'
+        >
+            {labelContent}
+            <div className={inputClassName}>
+                <SuggestionBox
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    ref={setSuggestionRef}
+                    placeholder={placeholder}
+                    listComponent={listComponent}
+                    className='form-control'
+                    containerClass='select-suggestion-container'
+                    value={currentInput}
+                    onChange={onChange}
+                    onItemSelected={handleSelected}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                    providers={providers}
+                    completeOnTab={true}
+                    renderNoResults={true}
+                    openOnFocus={true}
+                    openWhenEmpty={true}
+                    replaceAllInputOnSelect={true}
+                    disabled={disabled}
+                    listPosition={listPosition}
+                />
+                {helpTextContent}
+                {footer}
+            </div>
+        </div>
+    );
+};
+
+export default AutocompleteSelector;
