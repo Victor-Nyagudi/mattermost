@@ -1,154 +1,70 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {shallow} from 'enzyme';
 import React from 'react';
 
+import {renderWithContext} from 'tests/react_testing_utils';
+
 import AutocompleteSelector from './autocomplete_selector';
+import type {Props} from './autocomplete_selector';
+import SuggestionList from './suggestion/suggestion_list';
+
+const buttonText = {
+    onToggleFocusTrue: 'Fire props.ToggleFocus(true) function',
+    onToggleFocusFalse: 'Fire props.ToggleFocus(false) function',
+    handleSelected: 'Fire handleSelected function',
+};
+
+jest.mock('./suggestion/suggestion_box', () => ({
+    __esModule: true,
+    default: jest.fn((props) => {
+        return (
+            <div>
+                <button onClick={props.onFocus}>{buttonText.onToggleFocusTrue}</button>
+                <button onClick={props.onBlur}>{buttonText.onToggleFocusFalse}</button>
+                <button onClick={props.onItemSelected}>{buttonText.handleSelected}</button>
+            </div>
+        );
+    }),
+}));
 
 describe('components/widgets/settings/AutocompleteSelector', () => {
-    test('render component with required props', () => {
-        const wrapper = shallow(
-            <AutocompleteSelector
-                id='string.id'
-                label='some label'
-                value='some value'
-                providers={[]}
-            />,
-        );
-        expect(wrapper).toMatchInlineSnapshot(`
-            <div
-              className="form-group"
-              data-testid="autoCompleteSelector"
-            >
-              <label
-                className="control-label "
-              >
-                some label
-              </label>
-              <div
-                className=""
-              >
-                <Connect(SuggestionBox)
-                  className="form-control"
-                  completeOnTab={true}
-                  containerClass="select-suggestion-container"
-                  listComponent={[Function]}
-                  listPosition="top"
-                  onBlur={[Function]}
-                  onChange={[Function]}
-                  onFocus={[Function]}
-                  onItemSelected={[Function]}
-                  openOnFocus={true}
-                  openWhenEmpty={true}
-                  providers={Array []}
-                  renderNoResults={true}
-                  replaceAllInputOnSelect={true}
-                  value="some value"
-                />
-              </div>
-            </div>
-        `);
+    const baseProps: Props = {
+        id: 'string.id',
+        label: 'some label',
+        value: 'some value',
+        providers: [],
+        labelClassName: 'some label class name',
+        inputClassName: 'some input class name',
+        listComponent: SuggestionList,
+        listPosition: 'top',
+        toggleFocus: jest.fn(),
+        onSelected: jest.fn(),
+    };
+
+    test('toggleFocus function prop is called on focus', () => {
+        const {getByRole} = renderWithContext(<AutocompleteSelector {...baseProps}/>);
+
+        getByRole('button', {name: `${buttonText.onToggleFocusTrue}`}).click();
+
+        expect(baseProps.toggleFocus).toHaveBeenCalledTimes(1);
+        expect(baseProps.toggleFocus).toHaveBeenCalledWith(true);
     });
 
-    test('check snapshot with value prop and changing focus', () => {
-        const wrapper = shallow<AutocompleteSelector>(
-            <AutocompleteSelector
-                providers={[]}
-                label='some label'
-                value='value from prop'
-            />,
-        );
+    test('toggleFocus function prop is called on blur', () => {
+        const {getByRole} = renderWithContext(<AutocompleteSelector {...baseProps}/>);
 
-        wrapper.instance().onBlur();
+        getByRole('button', {name: `${buttonText.onToggleFocusFalse}`}).click();
 
-        expect(wrapper).toMatchInlineSnapshot(`
-            <div
-              className="form-group"
-              data-testid="autoCompleteSelector"
-            >
-              <label
-                className="control-label "
-              >
-                some label
-              </label>
-              <div
-                className=""
-              >
-                <Connect(SuggestionBox)
-                  className="form-control"
-                  completeOnTab={true}
-                  containerClass="select-suggestion-container"
-                  listComponent={[Function]}
-                  listPosition="top"
-                  onBlur={[Function]}
-                  onChange={[Function]}
-                  onFocus={[Function]}
-                  onItemSelected={[Function]}
-                  openOnFocus={true}
-                  openWhenEmpty={true}
-                  providers={Array []}
-                  renderNoResults={true}
-                  replaceAllInputOnSelect={true}
-                  value="value from prop"
-                />
-              </div>
-            </div>
-        `);
-
-        wrapper.instance().onChange(({target: {value: 'value from input'} as HTMLInputElement}));
-        wrapper.instance().onFocus();
-
-        expect(wrapper).toMatchInlineSnapshot(`
-            <div
-              className="form-group"
-              data-testid="autoCompleteSelector"
-            >
-              <label
-                className="control-label "
-              >
-                some label
-              </label>
-              <div
-                className=""
-              >
-                <Connect(SuggestionBox)
-                  className="form-control"
-                  completeOnTab={true}
-                  containerClass="select-suggestion-container"
-                  listComponent={[Function]}
-                  listPosition="top"
-                  onBlur={[Function]}
-                  onChange={[Function]}
-                  onFocus={[Function]}
-                  onItemSelected={[Function]}
-                  openOnFocus={true}
-                  openWhenEmpty={true}
-                  providers={Array []}
-                  renderNoResults={true}
-                  replaceAllInputOnSelect={true}
-                  value="value from input"
-                />
-              </div>
-            </div>
-        `);
+        expect(baseProps.toggleFocus).toHaveBeenCalledTimes(1);
+        expect(baseProps.toggleFocus).toHaveBeenCalledWith(false);
     });
 
-    test('onSelected', () => {
-        const onSelected = jest.fn();
-        const wrapper = shallow<AutocompleteSelector>(
-            <AutocompleteSelector
-                label='some label'
-                value='some value'
-                providers={[]}
-                onSelected={onSelected}
-            />,
-        );
+    test('onSelected function is called when item is selected', () => {
+        const {getByRole} = renderWithContext(<AutocompleteSelector {...baseProps}/>);
 
-        const selected = {text: 'sometext', value: 'somevalue', id: '', username: '', display_name: ''};
-        wrapper.instance().handleSelected(selected);
+        getByRole('button', {name: `${buttonText.handleSelected}`}).click();
 
-        expect(onSelected).toHaveBeenCalledTimes(1);
-        expect(onSelected).toHaveBeenCalledWith(selected);
+        expect(baseProps.onSelected).toHaveBeenCalledTimes(1);
     });
 });

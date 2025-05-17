@@ -139,6 +139,7 @@ const AutocompleteSelector = ({
             {labelContent}
             <div className={inputClassName}>
                 <SuggestionBox
+                    id={id}
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
                     ref={setSuggestionRef}
